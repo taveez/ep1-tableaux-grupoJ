@@ -36,12 +36,12 @@ Exemplos: `(p >> q)`, `(((a | b) >> q) & (~s))`
 python script.py
 ```
 
-Formato do arquivo de entrada: uma premissa por linha e a conclusão depois de `|-`
+Formato do arquivo de entrada: uma premissa por linha e a conclusão ao final
 
 ```
 (p >> q)
 p
-|- q
+q
 ```
 
 Exemplo de saída:
