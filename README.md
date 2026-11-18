@@ -33,7 +33,7 @@ Exemplos: `(p >> q)`, `(((a | b) >> q) & (~s))`
 ## Como usar
 
 ```bash
-python tableaux.py entrada.txt
+python script.py
 ```
 
 Formato do arquivo de entrada: uma premissa por linha e a conclusão depois de `|-`
@@ -56,13 +56,6 @@ Regras aplicadas:
 
 Para sequentes inválidos, a saída inclui o contra-exemplo, por exemplo `p = F, q = T`.
 
-## Testes
-
-```bash
-python testes.py
-```
-
-O script roda a bateria de sequentes de `testes/` e compara o resultado do tableau com `is_valid_truth_table()` do código-base.
 
 ## Estrutura do repositório
 
@@ -72,14 +65,8 @@ O script roda a bateria de sequentes de `testes/` e compara o resultado do table
 .
 ├── code_base_EP1.py       # código-base da disciplina (não alterar)
 ├── code_base_EP1_demo.py  # exemplos de uso do código-base
-├── tableaux.py            # script de utilização (entrada/saída)  (#6)
-├── estruturas.py          # SignedFormula, Branch                 (#1)
-├── regras.py              # regras de expansão α/β               (#2)
-├── fechamento.py          # fechamento de ramo, contra-exemplo   (#3)
-├── estrategia.py          # escolha da próxima regra             (#4)
-├── motor.py               # algoritmo principal / busca          (#5)
-├── testes.py              # bateria de testes                    (#7)
-├── testes/                # arquivos de sequentes de teste
+├── implementacao.py       # código de implementação das funções (#1-#6)
+├── script.py              # script de utilização (entrada/saída) (#7)
 └── docs/                  # seções do relatório
 ```
 

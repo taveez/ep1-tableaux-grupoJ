@@ -1,4 +1,4 @@
-from moodle.code_base_EP1 import Variable, Constant, Not, And, Or, Implies, ArgumentForm
+from code_base_EP1 import Variable, Constant, Not, And, Or, Implies, ArgumentForm
 
 # Issue #1 — Estruturas de Dados
 
