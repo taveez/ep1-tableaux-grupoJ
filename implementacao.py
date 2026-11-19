@@ -4,18 +4,60 @@ from code_base_EP1 import Variable, Constant, Not, And, Or, Implies, ArgumentFor
 # Issue #1 — Estruturas de Dados
 
 class SignedFormula:
+    # Permite a criação de objetos que guardam um sinal e uma fórmula
+
     def __init__(self, sinal, formula):
-        pass
+        if sinal not in ("T", "F"):
+            raise ValueError("O sinal deve ser T ou F em string")
+
+        self.sinal = sinal
+        self.formula = formula
+
+    # Permite printar a fórmula e seu sinal diretamente
+    def __str__(self):
+        return f"{self.sinal} {self.formula}"
 
 class Branch:
+    # Cria objetos Branch que guardam as formulas do ramo atual, os indices nos quais alguma regra já foi aplicada, os sinais das fórmulas, e se o ramo está fechado
     def __init__(self):
-        pass
+        self.formulas = []
+        self.expandidas = set()
+        self.sinais = {}
+        self.fechado = False
 
     def adicionar(self, sf):
-        pass
+        if self.fechado:
+            return
+        
+        # Adiciona uma fórmula(e sua valoração) no ramo atual
+        self.formulas.append(sf)
 
+        # Fecha os ramos quando aplicável
+        if isinstance(sf.formula, Variable):
+            nome = sf.formula.name # Fórmula em formato de string
+
+            if nome in self.sinais:
+                # Se chegar em contradição, fecha o ramo
+                if self.sinais[nome] != sf.sinal:
+                    self.fechado = True
+            else:
+                self.sinais[nome] = sf.sinal
+        elif isinstance(sf.formula, Constant):
+            if sf.formula.value != (sf.sinal == "T"):
+                self.fechado = True
+
+
+    # Cria uma cópia do ramo
     def copy(self):
-        pass
+        copia = Branch()
+
+        copia.formulas = self.formulas.copy()
+        copia.expandidas = self.expandidas.copy()
+        copia.sinais = self.sinais.copy()
+        copia.fechado = self.fechado
+
+        return copia
+
 
 
 # Issue #2 — Regras α
