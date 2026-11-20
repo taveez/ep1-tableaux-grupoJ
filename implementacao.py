@@ -28,7 +28,7 @@ class Branch:
     def adicionar(self, sf):
         if self.fechado:
             return
-        
+
         # Adiciona uma fórmula(e sua valoração) no ramo atual
         self.formulas.append(sf)
 
@@ -74,12 +74,68 @@ def beta(sf):
 
 # Issue #4 — Motor e estratégia
 
-def escolher(ramo):
-    pass
+# resolve o tableaux
+def solve(sequente : ArgumentForm) -> bool:
+    raiz = Branch()
 
-def provar(arg):
-    pass
+    for f in sequente.premises:
+        raiz.adicionar(SignedFormula("T", f))
+    raiz.adicionar(SignedFormula("F", sequente.conclusion))
 
+    return expand(raiz)
+
+# expande as fórmulas do ramo
+def expand(ramo: Branch) -> bool:
+    fila = [ # fila de fórmulas ainda não expandidas do ramo
+        i for i in range(len(ramo.formulas))
+        if i not in ramo.expandidas and
+        not isinstance(ramo.formulas[i].formula , (Variable, Constant))
+    ]
+
+    # expande as fórmulas de regra alfa
+    for i in fila:
+        sf = ramo.formulas[i]
+
+        if eh_alfa(sf):
+            f1, f2 = alfa(sf)
+            ramo.adicionar(f1)
+            ramo.adicionar(f2)
+
+            if ramo.fechado:
+                return True
+
+            ramo.expandidas.add(i)
+
+            if not isinstance(ramo.formulas[-1].formula, (Variable, Constant)):
+                fila.append(len(ramo.formulas) - 1)
+            if not isinstance(ramo.formulas[-2].formula, (Variable, Constant)):
+                fila.append(len(ramo.formulas) - 2)
+
+    # fila de fórmulas de regra beta ainda não expandidas do ramo
+    betas = [i for i in fila if i not in ramo.expandidas]
+
+    # expande as fórmulas de regra beta
+    if betas:
+        sf = ramo.formulas[betas[0]]
+
+        f1, f2 = beta(sf)
+        ramo.expandidas.add(betas[0])
+        aux = ramo.copy()
+
+        ramo.adicionar(f1)
+        aux.adicionar(f2)
+
+        return all([expand(ramo),expand(aux)]) # true se todos ramos tão fechados
+
+    return ramo.fechado
+
+def eh_alfa(sf: SignedFormula) -> bool:
+    f = sf.formula
+
+    if sf.sinal == "T":
+        return isinstance(f, (And, Not))
+    else:
+        return isinstance(f, (Or, Implies))
 
 # Issue #5 — Contra-exemplo
 
