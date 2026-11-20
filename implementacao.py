@@ -18,10 +18,11 @@ class SignedFormula:
         return f"{self.sinal} {self.formula}"
 
 class Branch:
-    # Cria objetos Branch que guardam as formulas do ramo atual, os indices nos quais alguma regra já foi aplicada, os sinais das fórmulas, e se o ramo está fechado
+    # Cria objetos Branch que guardam as formulas do ramo atual, os indices nos quais alguma regra já foi aplicada, a sequência de expansões aplicadas, os sinais das fórmulas, e se o ramo está fechado
     def __init__(self):
         self.formulas = []
         self.expandidas = set()
+        self.regras_aplicadas = []
         self.sinais = {}
         self.fechado = False
 
@@ -54,6 +55,7 @@ class Branch:
         copia.formulas = self.formulas.copy()
         copia.expandidas = self.expandidas.copy()
         copia.sinais = self.sinais.copy()
+        copia.regras_aplicadas = self.regras_aplicadas.copy()
         copia.fechado = self.fechado
 
         return copia
@@ -62,8 +64,43 @@ class Branch:
 
 # Issue #2 — Regras α
 
-def alfa(sf):
-    pass
+def atualizar_branch(regra, branch, sf, index): 
+    branch.regras_aplicadas.append((regra, sf))
+    branch.expandidas.add(index)
+
+# PRÉ: recebe branch atual e índice de branch.formulas
+
+# CAUTION: Não verifica se o fechou o ramo ou não, só atualiza seu status
+def alfa(branch, index):
+    if index in branch.expandidas:
+        return
+    
+    if index >= len(branch.formulas):
+        raise ValueError ("Índice maior que o número de fórmulas")
+
+    sf = branch.formulas[index]
+    if isinstance(sf.formula, And) and sf.sinal == 'T':
+        # Adiciona as subexpressões à branch
+        for filho in sf.formula.children:
+            sffilho = SignedFormula("T", filho)
+            branch.adicionar(sffilho)
+        atualizar_branch("α∧", branch, sf, index)
+    elif isinstance(sf.formula, Or) and sf.sinal == 'F':
+        for filho in sf.formula.children:
+            sffilho = SignedFormula('F', filho)
+            branch.adicionar(sffilho)
+        atualizar_branch("αV", branch, sf, index)
+    elif isinstance(sf.formula, Implies) and sf.sinal == 'F':
+        branch.adicionar(SignedFormula('T', sf.formula.children[0]))
+        branch.adicionar(SignedFormula('F', sf.formula.children[1]))
+        atualizar_branch("α→", branch, sf, index)
+    elif isinstance(sf.formula, Not) and sf.sinal == 'T':
+        sffilho = SignedFormula('F', sf.formula.children[0])
+        branch.adicionar(sffilho)
+        atualizar_branch("α¬", branch, sf, index)
+
+    else:
+        raise RuntimeError("Não caracteriza uma expansão alfa")
 
 
 # Issue #3 — Regras β
