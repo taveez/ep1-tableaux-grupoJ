@@ -64,41 +64,21 @@ class Branch:
 
 # Issue #2 — Regras α
 
-def atualizar_branch(regra, branch, sf, index): 
-    branch.regras_aplicadas.append((regra, sf))
-    branch.expandidas.add(index)
-
-# PRÉ: recebe branch atual e índice de branch.formulas
-
-# CAUTION: Não verifica se o fechou o ramo ou não, só atualiza seu status
-def alfa(branch, index):
-    if index in branch.expandidas:
-        return
-    
-    if index >= len(branch.formulas):
-        raise ValueError ("Índice maior que o número de fórmulas")
-
-    sf = branch.formulas[index]
+# Recebe uma SignedFormula e devolve uma lista com as fórmulas expandidas
+def alfa(sf):
+    formulas_expandidas = []
     if isinstance(sf.formula, And) and sf.sinal == 'T':
-        # Adiciona as subexpressões à branch
-        for filho in sf.formula.children:
-            sffilho = SignedFormula("T", filho)
-            branch.adicionar(sffilho)
-        atualizar_branch("α∧", branch, sf, index)
+        formulas_expandidas.extend(SignedFormula('T', filho) for filho in sf.formula.children)
     elif isinstance(sf.formula, Or) and sf.sinal == 'F':
-        for filho in sf.formula.children:
-            sffilho = SignedFormula('F', filho)
-            branch.adicionar(sffilho)
-        atualizar_branch("αV", branch, sf, index)
+        formulas_expandidas.extend(SignedFormula('F', filho) for filho in sf.formula.children)
     elif isinstance(sf.formula, Implies) and sf.sinal == 'F':
-        branch.adicionar(SignedFormula('T', sf.formula.children[0]))
-        branch.adicionar(SignedFormula('F', sf.formula.children[1]))
-        atualizar_branch("α→", branch, sf, index)
+        formulas_expandidas.append(SignedFormula('T', sf.formula.children[0]))
+        formulas_expandidas.append(SignedFormula('F', sf.formula.children[1]))
     elif isinstance(sf.formula, Not) and sf.sinal == 'T':
-        sffilho = SignedFormula('F', sf.formula.children[0])
-        branch.adicionar(sffilho)
-        atualizar_branch("α¬", branch, sf, index)
+        formulas_expandidas.extend(SignedFormula('F', sf.formula.children[0]) for i in range (2))
 
+    if formulas_expandidas:
+        return formulas_expandidas
     else:
         raise RuntimeError("Não caracteriza uma expansão alfa")
 
