@@ -18,10 +18,11 @@ class SignedFormula:
         return f"{self.sinal} {self.formula}"
 
 class Branch:
-    # Cria objetos Branch que guardam as formulas do ramo atual, os indices nos quais alguma regra já foi aplicada, os sinais das fórmulas, e se o ramo está fechado
+    # Cria objetos Branch que guardam as formulas do ramo atual, os indices nos quais alguma regra já foi aplicada, a sequência de expansões aplicadas, os sinais das fórmulas, e se o ramo está fechado
     def __init__(self):
         self.formulas = []
         self.expandidas = set()
+        self.regras_aplicadas = []
         self.sinais = {}
         self.fechado = False
 
@@ -54,6 +55,7 @@ class Branch:
         copia.formulas = self.formulas.copy()
         copia.expandidas = self.expandidas.copy()
         copia.sinais = self.sinais.copy()
+        copia.regras_aplicadas = self.regras_aplicadas.copy()
         copia.fechado = self.fechado
 
         return copia
@@ -62,8 +64,23 @@ class Branch:
 
 # Issue #2 — Regras α
 
+# Recebe uma SignedFormula e devolve uma lista com as fórmulas expandidas
 def alfa(sf):
-    pass
+    formulas_expandidas = []
+    if isinstance(sf.formula, And) and sf.sinal == 'T':
+        formulas_expandidas.extend(SignedFormula('T', filho) for filho in sf.formula.children)
+    elif isinstance(sf.formula, Or) and sf.sinal == 'F':
+        formulas_expandidas.extend(SignedFormula('F', filho) for filho in sf.formula.children)
+    elif isinstance(sf.formula, Implies) and sf.sinal == 'F':
+        formulas_expandidas.append(SignedFormula('T', sf.formula.children[0]))
+        formulas_expandidas.append(SignedFormula('F', sf.formula.children[1]))
+    elif isinstance(sf.formula, Not) and sf.sinal == 'T':
+        formulas_expandidas.extend(SignedFormula('F', sf.formula.children[0]) for i in range (2))
+
+    if formulas_expandidas:
+        return formulas_expandidas
+    else:
+        raise RuntimeError("Não caracteriza uma expansão alfa")
 
 
 # Issue #3 — Regras β
