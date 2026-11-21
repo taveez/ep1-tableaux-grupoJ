@@ -65,7 +65,7 @@ class Branch:
 # Issue #2 — Regras α
 
 # Recebe uma SignedFormula e devolve uma lista com as fórmulas expandidas
-def alfa(sf):
+def alfa(sf) -> list[SignedFormula]:
     formulas_expandidas = []
     if isinstance(sf.formula, And) and sf.sinal == 'T':
         formulas_expandidas.extend(SignedFormula('T', filho) for filho in sf.formula.children)
@@ -75,7 +75,7 @@ def alfa(sf):
         formulas_expandidas.append(SignedFormula('T', sf.formula.children[0]))
         formulas_expandidas.append(SignedFormula('F', sf.formula.children[1]))
     elif isinstance(sf.formula, Not) and sf.sinal == 'T':
-        formulas_expandidas.extend(SignedFormula('F', sf.formula.children[0]) for i in range (2))
+        formulas_expandidas.append(SignedFormula('F', sf.formula.children[0]))
 
     if formulas_expandidas:
         return formulas_expandidas
@@ -85,7 +85,7 @@ def alfa(sf):
 
 # Issue #3 — Regras β
 
-def beta(sf):
+def beta(sf) -> list[SignedFormula]:
     pass
 
 
@@ -114,19 +114,19 @@ def expand(ramo: Branch) -> bool:
         sf = ramo.formulas[i]
 
         if eh_alfa(sf):
-            f1, f2 = alfa(sf)
-            ramo.adicionar(f1)
-            ramo.adicionar(f2)
+            # adiciona cada novo termo ao ramo
+            for newsf in alfa(sf):
+                ramo.adicionar(newsf)
 
-            if ramo.fechado:
-                return True
+                # checa se o ramo fechou à cada adição de novo termo
+                if ramo.fechado:
+                    return True
+
+                # adiciona à fila novas fórmulas ainda não expandidas
+                if not isinstance(newsf.formula, (Variable, Constant)):
+                    fila.append(len(ramo.formulas) - 1);
 
             ramo.expandidas.add(i)
-
-            if not isinstance(ramo.formulas[-1].formula, (Variable, Constant)):
-                fila.append(len(ramo.formulas) - 1)
-            if not isinstance(ramo.formulas[-2].formula, (Variable, Constant)):
-                fila.append(len(ramo.formulas) - 2)
 
     # fila de fórmulas de regra beta ainda não expandidas do ramo
     betas = [i for i in fila if i not in ramo.expandidas]
@@ -135,14 +135,15 @@ def expand(ramo: Branch) -> bool:
     if betas:
         sf = ramo.formulas[betas[0]]
 
-        f1, f2 = beta(sf)
         ramo.expandidas.add(betas[0])
-        aux = ramo.copy()
+        folhas = []
 
-        ramo.adicionar(f1)
-        aux.adicionar(f2)
+        for newsf in beta(sf):
+            aux = ramo.copy()
+            folhas.append(aux)
+            aux.adicionar(newsf)
 
-        return all([expand(ramo),expand(aux)]) # true se todos ramos tão fechados
+        return all(expand(folha) for folha in folhas) # true se todos ramos tão fechados
 
     return ramo.fechado
 
