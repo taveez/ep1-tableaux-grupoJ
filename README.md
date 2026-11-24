@@ -1,6 +1,6 @@
 # EP1 — Tableaux Semânticos
 
-EP de **MAC0239 – Métodos Formais em Programação** (IME-USP, 2026).
+EP de **MAC0239 – Introdução à Lógica e Verificação de Programas** (IME-USP, 2026).
 
 Implementação, em Python, de um provador para o cálculo proposicional usando **tableaux semânticos**. Dado um sequente
 
@@ -77,17 +77,5 @@ Para sequentes inválidos, a saída inclui o contra-exemplo, por exemplo `p = F,
 - [ ] Relatório (`.pdf`): instruções de uso, sequentes de teste, estruturas e estratégias, dificuldades
 
 **Prazo:** 18/11/2026
-
-## Grupo
-
-| Nome | NUSP | Issue |
-|------|------|-------|
-|      |      | #1    |
-|      |      | #2    |
-|      |      | #3    |
-|      |      | #4    |
-|      |      | #5    |
-|      |      | #6    |
-|      |      | #7    |
 
 Veja [CONTRIBUTING.md](CONTRIBUTING.md) para o fluxo de trabalho do grupo.
