@@ -110,7 +110,8 @@ def solve(sequente : ArgumentForm):
         raiz.adicionar(SignedFormula("T", f))
     raiz.adicionar(SignedFormula("F", sequente.conclusion))
 
-    return expand(raiz, regras), regras
+    valido, exemplo = expand(raiz, regras)
+    return valido, exemplo, regras
 
 # expande as fórmulas do ramo
 def expand(ramo: Branch, regras):
