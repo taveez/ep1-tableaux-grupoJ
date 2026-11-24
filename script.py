@@ -1,9 +1,6 @@
 from implementacao import ler_formula, solve
 from code_base_EP1 import ArgumentForm
 
-
-# Issue #7 — Testes da aplicação
-
 SEQUENTES = [
     # Nome, premissas, conclusão, resultado esperado
     ("T1 — Modus ponens",
@@ -50,7 +47,8 @@ def verificar(nome, premissas, conclusao, esperado):
         conclusion=formula_conclusao
     )
 
-    resultado_tableau = solve(argumento)
+    retorno = solve(argumento)
+    resultado_tableau = retorno[0] if isinstance(retorno, tuple) else retorno
     resultado_tabela = argumento.is_valid_truth_table()
 
     passou = (
