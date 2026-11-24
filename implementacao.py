@@ -85,8 +85,39 @@ def alfa(sf) -> list[SignedFormula]:
 
 # Issue #3 — Regras β
 
+
 def beta(sf) -> list[SignedFormula]:
-    pass
+    formulas_expandidas = []
+    f = sf.formula
+
+    if isinstance(f, Or) and sf.sinal == "T":
+        formulas_expandidas.extend(
+            SignedFormula("T", filho) for filho in f.children
+        )
+
+    elif isinstance(f, And) and sf.sinal == "F":
+        formulas_expandidas.extend(
+            SignedFormula("F", filho) for filho in f.children
+        )
+
+    elif isinstance(f, Implies) and sf.sinal == "T":
+        formulas_expandidas.append(
+            SignedFormula("F", f.children[0])
+        )
+        formulas_expandidas.append(
+            SignedFormula("T", f.children[1])
+        )
+
+    elif isinstance(f, Not) and sf.sinal == "F":
+        formulas_expandidas.append(
+            SignedFormula("T", f.children[0])
+        )
+
+    if formulas_expandidas:
+        return formulas_expandidas
+
+    raise RuntimeError("Não caracteriza uma expansão beta")
+
 
 
 # Issue #4 — Motor e estratégia
