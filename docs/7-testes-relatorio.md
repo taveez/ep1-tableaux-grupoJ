@@ -2,44 +2,54 @@
 
 ## 1. Objetivo
 
-Esta etapa tem como objetivo testar o provador de tableaux semânticos para a lógica proposicional e comparar seus resultados com os resultados obtidos pelo método da tabela-verdade.
+Esta etapa teve como objetivo testar o provador de tableaux semânticos para a lógica proposicional e comparar os resultados obtidos com aqueles fornecidos pelo método da tabela-verdade.
 
 ## 2. Estratégia de testes
 
-Os testes devem contemplar argumentos válidos e inválidos, incluindo casos com premissas contraditórias e fórmulas com constantes lógicas.
+Foram definidos 11 casos de teste para avaliar argumentos válidos e inválidos. A seleção incluiu argumentos clássicos da lógica proposicional, premissas contraditórias e fórmulas com constantes lógicas.
 
-Para cada argumento, o resultado produzido pelo provador deve ser comparado com o resultado do método da tabela-verdade. Nos casos de argumentos inválidos, também deve ser verificado se o contraexemplo apresentado satisfaz as premissas e falsifica a conclusão.
+Para cada caso, foram comparados três elementos: o resultado do provador de tableaux, o resultado do método da tabela-verdade e o resultado esperado para o argumento.
 
-## 3. Casos de teste propostos
+## 3. Casos de teste e resultados
 
-| Teste | Premissas | Conclusão | Resultado esperado |
+| Teste | Caso avaliado | Resultado esperado | Resultado obtido |
 |---|---|---|---|
-| T1 — Modus ponens | `p`, `(p >> q)` | `q` | Válido |
-| T2 — Modus tollens | `(p >> q)`, `~q` | `~p` | Válido |
-| T3 — Silogismo disjuntivo | `(p \| q)`, `~p` | `q` | Válido |
-| T4 — Tautologia | Nenhuma | `(p \| ~p)` | Válido |
-| T5 — Premissa insuficiente | `p` | `q` | Inválido |
-| T6 — Afirmação do consequente | `(p >> q)`, `q` | `p` | Inválido |
-| T7 — Negação do antecedente | `(p >> q)`, `~p` | `~q` | Inválido |
-| T8 — Premissas contraditórias | `p`, `~p` | `q` | Válido |
-| T9 — Constantes lógicas | `True` | `False` | Inválido |
-| T10 — Constante verdadeira | Nenhuma | `True` | Válido |
-| T11 — Constante falsa | Nenhuma | `False` | Inválido |
+| T1 | Modus ponens | Válido | Aprovado |
+| T2 | Modus tollens | Válido | Aprovado |
+| T3 | Silogismo disjuntivo | Válido | Aprovado |
+| T4 | Tautologia | Válido | Aprovado |
+| T5 | Premissa insuficiente | Inválido | Aprovado |
+| T6 | Afirmação do consequente | Inválido | Aprovado |
+| T7 | Negação do antecedente | Inválido | Aprovado |
+| T8 | Premissas contraditórias | Válido | Aprovado |
+| T9 | Premissa verdadeira e conclusão falsa | Inválido | Aprovado |
+| T10 | Conclusão verdadeira | Válido | Aprovado |
+| T11 | Conclusão falsa | Inválido | Aprovado |
 
-Os resultados da tabela são expectativas lógicas. Eles ainda precisam ser confirmados pela execução dos testes na implementação do grupo.
+## 4. Resultados obtidos
 
-## 4. Verificação dos resultados
+A execução do arquivo `script.py` resultou na aprovação dos 11 casos de teste, correspondendo a uma taxa de aprovação de 100%.
 
-A execução dos testes deverá permitir identificar divergências entre o provador de tableaux e o método da tabela-verdade.
+Em todos os casos, o resultado produzido pelo provador de tableaux coincidiu com o resultado do método da tabela-verdade e com a classificação esperada.
 
-Também deverá ser verificado se os contraexemplos encontrados para argumentos inválidos são coerentes com as premissas e a conclusão.
+Os testes contemplaram argumentos válidos e inválidos, além de situações com premissas contraditórias e constantes lógicas. Os resultados indicam que a implementação apresentou o comportamento esperado para os casos avaliados.
 
 ## 5. Dificuldades e observações
 
-Uma dificuldade desta etapa é garantir que os testes utilizem a sintaxe aceita pela implementação e que os resultados dos dois métodos possam ser comparados corretamente.
+Durante os testes iniciais, alguns casos apresentaram o erro `'NoneType' object is not iterable'`. A investigação identificou que a função responsável pelas regras β precisava estar implementada.
 
-A versão final desta seção deverá registrar as dificuldades efetivamente encontradas durante a execução dos testes e as soluções adotadas.
+Após a utilização da implementação da regra β fornecida pelo integrante responsável por essa parte do projeto, os testes foram executados novamente. Os 11 casos passaram, sem divergências entre os resultados do tableau e os da tabela-verdade.
 
-## 6. Situação dos testes
+## 6. Conclusão
 
-Os casos de teste foram propostos, mas seus resultados ainda precisam ser executados e registrados. Esta seção deverá ser atualizada após a integração com a implementação final do grupo.
+Os testes realizados permitiram comparar o comportamento do provador de tableaux com o método da tabela-verdade em 11 casos selecionados. Todos os casos apresentaram os resultados esperados.
+
+Conclui-se que a implementação passou nos testes executados. Essa conclusão se limita aos casos avaliados e não garante a ausência de erros em todas as fórmulas possíveis.
+
+A verificação automática de contraexemplos para os argumentos inválidos deverá ser registrada separadamente caso seja implementada e executada.
+
+## 7. Dificuldades e soluções
+
+A principal dificuldade foi identificar a causa dos erros apresentados na primeira execução e garantir que os testes fossem realizados com a implementação integrada da regra β.
+
+A solução consistiu em utilizar a implementação da regra β do integrante responsável e executar novamente os 11 testes, comparando os resultados do tableau com os da tabela-verdade.
