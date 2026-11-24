@@ -22,7 +22,6 @@ class Branch:
     def __init__(self):
         self.formulas = []
         self.expandidas = set()
-        self.regras_aplicadas = []
         self.sinais = {}
         self.fechado = False
 
@@ -47,7 +46,6 @@ class Branch:
             if sf.formula.value != (sf.sinal == "T"):
                 self.fechado = True
 
-
     # Cria uma cópia do ramo
     def copy(self):
         copia = Branch()
@@ -55,7 +53,6 @@ class Branch:
         copia.formulas = self.formulas.copy()
         copia.expandidas = self.expandidas.copy()
         copia.sinais = self.sinais.copy()
-        copia.regras_aplicadas = self.regras_aplicadas.copy()
         copia.fechado = self.fechado
 
         return copia
@@ -65,17 +62,16 @@ class Branch:
 # Issue #2 — Regras α
 
 # Recebe uma SignedFormula e devolve uma lista com as fórmulas expandidas
-def alfa(sf) -> list[SignedFormula]:
+def alfa(sf):
     formulas_expandidas = []
     if isinstance(sf.formula, And) and sf.sinal == 'T':
-        formulas_expandidas.extend(SignedFormula('T', filho) for filho in sf.formula.children)
+        formulas_expandidas.extend(("α∧", [SignedFormula('T', filho) for filho in sf.formula.children]))
     elif isinstance(sf.formula, Or) and sf.sinal == 'F':
-        formulas_expandidas.extend(SignedFormula('F', filho) for filho in sf.formula.children)
+        formulas_expandidas.extend(("α∨", [SignedFormula('F', filho) for filho in sf.formula.children]))
     elif isinstance(sf.formula, Implies) and sf.sinal == 'F':
-        formulas_expandidas.append(SignedFormula('T', sf.formula.children[0]))
-        formulas_expandidas.append(SignedFormula('F', sf.formula.children[1]))
+        formulas_expandidas.extend(("α→", [SignedFormula('T', sf.formula.children[0]), SignedFormula('F', sf.formula.children[1])]))
     elif isinstance(sf.formula, Not) and sf.sinal == 'T':
-        formulas_expandidas.append(SignedFormula('F', sf.formula.children[0]))
+        formulas_expandidas.extend(("α¬", [SignedFormula('F', sf.formula.children[0])]))
 
     if formulas_expandidas:
         return formulas_expandidas
@@ -86,17 +82,16 @@ def alfa(sf) -> list[SignedFormula]:
 # Issue #3 — Regras β
 
 """Recebe uma SignedFormula β e devolve uma lista com uma fórmula por ramo novo"""
-def beta(sf: SignedFormula) -> list[SignedFormula]:
+def beta(sf: SignedFormula):
     ramos = []
     if isinstance(sf.formula, And) and sf.sinal == 'F':
-        ramos.extend(SignedFormula('F', filho) for filho in sf.formula.children)
+        ramos.extend(("β∧", [SignedFormula('F', filho) for filho in sf.formula.children]))
     elif isinstance(sf.formula, Or) and sf.sinal == 'T':
-        ramos.extend(SignedFormula('T', filho) for filho in sf.formula.children)
+        ramos.extend(("β∨", [SignedFormula('T', filho) for filho in sf.formula.children]))
     elif isinstance(sf.formula, Implies) and sf.sinal == 'T':
-        ramos.append(SignedFormula('F', sf.formula.children[0]))
-        ramos.append(SignedFormula('T', sf.formula.children[1]))
+        ramos.extend(("β→", [SignedFormula('F', sf.formula.children[0]), SignedFormula('T', sf.formula.children[1])]))
     elif isinstance(sf.formula, Not) and sf.sinal == 'F':
-        ramos.append(SignedFormula('T', sf.formula.children[0]))
+        ramos.extend(("β¬", [SignedFormula('T', sf.formula.children[0])]))
 
     if ramos:
         return ramos
@@ -107,17 +102,21 @@ def beta(sf: SignedFormula) -> list[SignedFormula]:
 # Issue #4 — Motor e estratégia
 
 # resolve o tableaux
-def solve(sequente : ArgumentForm) -> bool:
+def solve(sequente : ArgumentForm):
     raiz = Branch()
+    regras = []
 
     for f in sequente.premises:
         raiz.adicionar(SignedFormula("T", f))
     raiz.adicionar(SignedFormula("F", sequente.conclusion))
 
-    return expand(raiz)
+    return expand(raiz, regras), regras
 
 # expande as fórmulas do ramo
-def expand(ramo: Branch) -> bool:
+def expand(ramo: Branch, regras):
+    if ramo.fechado:
+        return (True, None)
+
     fila = [ # fila de fórmulas ainda não expandidas do ramo
         i for i in range(len(ramo.formulas))
         if i not in ramo.expandidas and
@@ -130,18 +129,19 @@ def expand(ramo: Branch) -> bool:
 
         if eh_alfa(sf):
             # adiciona cada novo termo ao ramo
-            for newsf in alfa(sf):
-                ramo.adicionar(newsf)
+            ramo.expandidas.add(i)
+            regra, newsfs = alfa(sf)
+            regras.append((regra, sf))
 
-                # checa se o ramo fechou à cada adição de novo termo
-                if ramo.fechado:
-                    return True
+            for newsf in newsfs:
+                ramo.adicionar(newsf)
 
                 # adiciona à fila novas fórmulas ainda não expandidas
                 if not isinstance(newsf.formula, (Variable, Constant)):
                     fila.append(len(ramo.formulas) - 1);
 
-            ramo.expandidas.add(i)
+            if ramo.fechado:
+                return (True, None)
 
     # fila de fórmulas de regra beta ainda não expandidas do ramo
     betas = [i for i in fila if i not in ramo.expandidas]
@@ -149,18 +149,27 @@ def expand(ramo: Branch) -> bool:
     # expande as fórmulas de regra beta
     if betas:
         sf = ramo.formulas[betas[0]]
-
         ramo.expandidas.add(betas[0])
-        folhas = []
 
-        for newsf in beta(sf):
+        folhas = []
+        regra, newsfs = beta(sf)
+        regras.append((regra, sf))
+
+        for newsf in newsfs:
             aux = ramo.copy()
             folhas.append(aux)
             aux.adicionar(newsf)
 
-        return all(expand(folha) for folha in folhas) # true se todos ramos tão fechados
+        for folha in folhas:
+            result = expand(folha, regras)
+            if result[0]:
+                continue
+            else:
+                return result
+        return (True, None)
 
-    return ramo.fechado
+    return (False, contra_exemplo(ramo))
+
 
 def eh_alfa(sf: SignedFormula) -> bool:
     f = sf.formula
@@ -172,7 +181,7 @@ def eh_alfa(sf: SignedFormula) -> bool:
 
 # Issue #5 — Contra-exemplo
 
-def contra_exemplo(ramo, arg):
+def contra_exemplo(ramo):
     pass
 
 
