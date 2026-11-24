@@ -85,8 +85,23 @@ def alfa(sf) -> list[SignedFormula]:
 
 # Issue #3 — Regras β
 
-def beta(sf) -> list[SignedFormula]:
-    pass
+"""Recebe uma SignedFormula β e devolve uma lista com uma fórmula por ramo novo"""
+def beta(sf: SignedFormula) -> list[SignedFormula]:
+    ramos = []
+    if isinstance(sf.formula, And) and sf.sinal == 'F':
+        ramos.extend(SignedFormula('F', filho) for filho in sf.formula.children)
+    elif isinstance(sf.formula, Or) and sf.sinal == 'T':
+        ramos.extend(SignedFormula('T', filho) for filho in sf.formula.children)
+    elif isinstance(sf.formula, Implies) and sf.sinal == 'T':
+        ramos.append(SignedFormula('F', sf.formula.children[0]))
+        ramos.append(SignedFormula('T', sf.formula.children[1]))
+    elif isinstance(sf.formula, Not) and sf.sinal == 'F':
+        ramos.append(SignedFormula('T', sf.formula.children[0]))
+
+    if ramos:
+        return ramos
+    else:
+        raise RuntimeError("Não caracteriza uma expansão beta")
 
 
 # Issue #4 — Motor e estratégia
