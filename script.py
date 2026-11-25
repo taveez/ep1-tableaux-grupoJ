@@ -1,4 +1,4 @@
-from implementacao import ler_formula, solve
+from implementacao import ler_formula, solve, imprimir_resultado
 from code_base_EP1 import ArgumentForm
 
 SEQUENTES = [
@@ -63,6 +63,8 @@ def verificar(nome, premissas, conclusao, esperado):
     print(f"  Tableau: {resultado_tableau}")
     print(f"  Tabela-verdade: {resultado_tabela}")
     print(f"  Esperado: {esperado}")
+    if isinstance(retorno, tuple):
+        imprimir_resultado(argumento, retorno)
 
     return passou
 
