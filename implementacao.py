@@ -183,8 +183,25 @@ def eh_alfa(sf: SignedFormula) -> bool:
 # Issue #5 — Contra-exemplo
 
 def contra_exemplo(ramo):
-    pass
+    # set para todos os átomos do ramo:
+    atomos = {
+        nome
+        for sf in ramo.formulas
+        for nome in sf.formula.variables()
+    }
 
+    # definindo a valoracao com F nos átomos livres:
+    valoracao = {
+        nome: ramo.sinais.get(nome, "F") == "T"
+        for nome in sorted(atomos)
+    }
+
+    # confirmando se a valoracao encontrada tem os sinais esperados: 
+    for sf in ramo.formulas:
+        if sf.formula.evaluate(**valoracao) != (sf.sinal == "T"):
+            raise ValueError("Valoração incompatível com o ramo aberto")
+
+    return valoracao
 
 # Issue #6 — Entrada e saída
 
