@@ -21,7 +21,7 @@ As fórmulas são escritas utilizando a sintaxe Python aceita pelo código-base:
 | Implicação | `>>`            | `(p >> q)`        |
 | Constantes | `True`, `False` |                   |
 
-> **Atenção à parentização:** como o parsing usa `eval()` do Python, os operadores seguem a precedência do Python (por exemplo, `|` e `&` têm precedência maior que `>>`). Por isso, **parentize todas as subfórmulas compostas**, como em `(((a | b) >> q) & (~s))`.
+> **Atenção à parentização:** como o parsing usa `eval()` do Python, os operadores seguem a precedência do Python (por exemplo, `>>` tem precedência maior que `&` e `|`, de modo que `p | q >> r` é interpretado como `p | (q >> r)`). Por isso, **parentize todas as subfórmulas compostas**, como em `(((a | b) >> q) & (~s))`.
 
 ### 1.3 Executando a bateria de testes (`script.py`)
 
@@ -152,6 +152,7 @@ O método `Branch.copy()` cria uma cópia independente das estruturas internas (
 
 - **Prioridade para regras $\alpha$ antes de regras $\beta$:** ao expandir um ramo, `expand` coleta os índices de fórmulas compostas não expandidas e aplica primeiro todas as regras $\alpha$ disponíveis (incluindo novas fórmulas $\alpha$ adicionadas durante o próprio laço), verificando após a expansão se o ramo fechou. Somente quando não restam regras $\alpha$ pendentes no ramo é escolhida uma fórmula $\beta$ (a primeira disponível na fila). Essa prioridade evita duplicar ramos prematuramente e reduz o tamanho da árvore de busca.
 - **Busca em profundidade (DFS):** ao aplicar uma regra $\beta$, o algoritmo cria uma cópia do ramo via `ramo.copy()` para cada subfórmula gerada e chama `expand` recursivamente. Se todos os ramos filhos fecharem, o ramo atual é considerado fechado (sequente válido); caso um ramo termine saturado sem fechar (sem novas regras $\alpha$ ou $\beta$ a aplicar), ele permanece aberto (sequente inválido).
+- **Extração de contra-exemplo (`contra_exemplo`):** ao atingir um ramo aberto saturado, coleta-se o conjunto de todos os átomos presentes nas fórmulas do ramo (`sf.formula.variables()`), atribui-se `True`/`False` conforme os literais registrados em `ramo.sinais` (definindo `False` para eventuais átomos livres) e valida-se com `evaluate()` que a valoração encontrada satisfaz todos os sinais esperados do ramo.
 
 ---
 
